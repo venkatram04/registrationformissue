@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <title>Student Registration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-image: linear-gradient(to right, #7171dd, #fff, #7171dd);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        /* Popup message styles */
+        .popup-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffffff;
+            color: #333;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            font-size: 16px;
+            text-align: center;
+            display: none; /* Hidden by default */
+            z-index: 2000;
+        }
+
+        /* Popup fade-in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .popup-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            background-image: linear-gradient(to right, #0a70d5, #00BFFF); /* Background color for visibility */
+            padding: 10px 20px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .navbar a:hover {
+            color: #110a10; /* Golden Yellow on Hover/Active */
+            text-shadow: 0 8px 12px rgba(12, 78, 245, 0.8);
+            text-decoration: underline; /* Adds a subtle underline effect */    
+        }
+
+        .navbar a.active {
+            background-color: #00BFFF; 
+            color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Registration Form */
+        .admission-card {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+            margin-top: 80px; /* Added space below navbar */
+            margin-bottom: 30px;
+        }
+
+        .admission-card h2 {
+            color: #0a70d5;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .section-title {
+            background-color: #0a70d5;
+            color: white;
+            padding: 10px 15px;
+            margin: 20px 0 15px;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+
+        .admission-card label {
+            font-weight: bold;
+            margin: 10px 0 5px;
+            display: block;
+            color: #333;
+        }
+
+        .admission-card input, .admission-card select, .admission-card textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .admission-card textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        .checkbox-container {
+            margin: 15px 0;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            margin-top: 3px;
+        }
+
+        .file-input-container {
+            margin-bottom: 15px;
+        }
+
+        .file-input-container label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .file-input-container input[type="file"] {
+            border: 1px solid #ddd;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .marks-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .marks-table th, .marks-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .marks-table th {
+            background-color: #f2f2f2;
+        }
+
+        .marks-table input {
+            width: 100%;
+            padding: 8px;
+            margin: 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            float: right;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+
+        /* Popup Message */
+        .popup-message1 {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70vw;
+            color: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            font-size: 16px;
+            text-align: left;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease-in-out;
+            background-image: linear-gradient(45deg, #0062cc, #001b44);
+        }
+
+        .popup-message1:target {
+            display: none; /* Show popup when linked */
+        }
+
+        .popup-message1 .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 30px;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .popup-message1 .close-button:hover {
+            color: red;
+            transform: scale(1.1);
+        }
+        .popup-message1 p {
+            line-height: 1.6;
+        }
+        /* Styling adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .popup-message1 {
+                width: 90%;
+                padding: 15px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .admission-card {
+                padding: 20px;
+                max-width: 95%;
+            }
+        }
+        /* Overlay for blur and dark background */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent dark background */
+            backdrop-filter: blur(8px); /* Blur effect */
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .overlay.active {
+            display: flex; /* Show overlay when active */
+        }
+
+        .first-page{
+            height: 100vh;
+            /* Style for the Home Section */
+            display: flex;
+            flex-direction: column; /* Stack children vertically */
+            justify-content: center; /* Center content vertically */
+            align-items: center; /* Center content horizontally */
+            min-height: 100vh; /* Ensure it takes up at least full viewport height */
+            padding: 20px; /* Add padding to avoid edges */
+            box-sizing: border-box; /* Include padding in the height */
+            background-color: #ffffff; /* White background */
+        }
+        
+        .bot-icon{
+            text-align: left;
+            top: 0; /* Positions the navbar at the very top */
+            right: 0; /* Ensures it starts from the left edge */ 
+            gap: 15px;
+            font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            color: #ffffff;
+            width: 100%; /* Makes the navbar span the entire width */
+            background-color: transparent ;/* Background color for visibility */
+            padding: 3px ; /* Adds padding for better spacing */
+            display: flex; /* Aligns items in a row */
+            justify-content: flex-start; /* Adds space between items */
+            align-items: left; /* Centers items vertically */
+            z-index: 1000; /* Ensures the navbar stays above other elements */
+        }
+        
+        .bot-icon-style{
+            font-size: 30px;
+            height: 30px;
+        }
+        
+        .success-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            font-size: 18px;
+            text-align: center;
+            display: none;
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="bot-icon">
+            <i class="bot-icon-style fa-solid fa-robot"></i>
+            <h1>AI Admission Assistant</h1>
+        </div>
+        <a href="index.html">Home</a>
+        <a href="registration.html" class="active">Registration</a>
+        <a href="enquiry.html">Enquiry</a>
+        <a href="#" id="about-link">About</a>
+    </div>
+
+    <!-- Registration Form -->
+    <div class="admission-card">
+        <h2>Student Registration Form</h2>
+        <form id="registrationForm" action="/submit-registration" method="post" enctype="multipart/form-data">
+            <!-- Personal Details Section -->
+            <div class="section-title">Personal Details</div>
+            
+            <div class="form-row">
+                <div class="form-col">
+                    <label for="firstName" class="required-field">First Name</label>
+                    <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required>
+                </div>
+                <div class="form-col">
+                    <label for="lastName" class="required-field">Last Name</label>
+                    <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <label for="dob" class="required-field">Date of Birth</label>
+                    <input type="date" id="dob" name="dob" required>
+                </div>
+                <div class="form-col">
+                    <label for="gender" class="required-field">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col" style="flex: 0.4;">
+                    <label for="countryCode" class="required-field">Country Code</label>
+                    <select id="countryCode" name="countryCode" required>
+                        <option value="+91">India (+91)</option>
+                        <option value="+1">USA (+1)</option>
+                        <option value="+44">UK (+44)</option>
+                        <option value="+61">Australia (+61)</option>
+                        <option value="+86">China (+86)</option>
+                        <option value="+81">Japan (+81)</option>
+                        <option value="+49">Germany (+49)</option>
+                        <option value="+33">France (+33)</option>
+                        <option value="+7">Russia (+7)</option>
+                        <option value="+65">Singapore (+65)</option>
+                    </select>
+                </div>
+                <div class="form-col" style="flex: 0.6;">
+                    <label for="mobile" class="required-field">Mobile Number</label>
+                    <input type="tel" id="mobile" name="mobile" placeholder="Enter mobile number" pattern="[0-9]{10}" maxlength="10" required>
+                </div>
+            </div>
+
+            <label for="email" class="required-field">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+
+            <label for="address" class="required-field">Permanent Address</label>
+            <textarea id="address" name="address" placeholder="Enter your complete address" required></textarea>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <label for="city" class="required-field">City</label>
+                    <input type="text" id="city" name="city" placeholder="Enter city" required>
+                </div>
+                <div class="form-col">
+                    <label for="state" class="required-field">State</label>
+                    <select id="state" name="state" required>
+                        <option value="">Select State</option>
+                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        <option value="Assam">Assam</option>
+                        <option value="Bihar">Bihar</option>
+                        <option value="Chhattisgarh">Chhattisgarh</option>
+                        <option value="Goa">Goa</option>
+                        <option value="Gujarat">Gujarat</option>
+                        <option value="Haryana">Haryana</option>
+                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                        <option value="Jharkhand">Jharkhand</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Manipur">Manipur</option>
+                        <option value="Meghalaya">Meghalaya</option>
+                        <option value="Mizoram">Mizoram</option>
+                        <option value="Nagaland">Nagaland</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Rajasthan">Rajasthan</option>
+                        <option value="Sikkim">Sikkim</option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Telangana">Telangana</option>
+                        <option value="Tripura">Tripura</option>
+                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option value="Uttarakhand">Uttarakhand</option>
+                        <option value="West Bengal">West Bengal</option>
+                    </select>
+                </div>
+                <div class="form-col">
+                    <label for="pincode" class="required-field">Pincode</label>
+                    <input type="text" id="pincode" name="pincode" placeholder="Enter pincode" pattern="[0-9]{6}" maxlength="6" required>
+                </div>
+            </div>
+
+            <!-- College Preference Section -->
+            <div class="section-title">College Preference</div>
+            
+            <label for="preferredCollege" class="required-field">Which college do you want to join?</label>
+            <select id="preferredCollege" name="preferredCollege" required>
+                <option value="">Select College</option>
+                <option value="Indian Institute of Technology Delhi">Indian Institute of Technology Delhi</option>
+                <option value="Indian Institute of Technology Bombay">Indian Institute of Technology Bombay</option>
+                <option value="Indian Institute of Technology Madras">Indian Institute of Technology Madras</option>
+                <option value="Indian Institute of Technology Kanpur">Indian Institute of Technology Kanpur</option>
+                <option value="Indian Institute of Technology Kharagpur">Indian Institute of Technology Kharagpur</option>
+                <option value="Delhi University">Delhi University</option>
+                <option value="Anna University">Anna University</option>
+                <option value="Jadavpur University">Jadavpur University</option>
+                <option value="Banaras Hindu University">Banaras Hindu University</option>
+                <option value="Vellore Institute of Technology">Vellore Institute of Technology</option>
+            </select>
+
+            <label for="preferredCourse" class="required-field">Select Preferred Course</label>
+            <select id="preferredCourse" name="preferredCourse" required>
+                <option value="">Select Course</option>
+                <option value="B.E. - Computer Science and Engineering">B.E. - Computer Science and Engineering</option>
+                <option value="B.E. - Computer Science with AI">B.E. - Computer Science with AI</option>
+                <option value="B.E. - Computer Science with Data Science">B.E. - Computer Science with Data Science</option>
+                <option value="B.E. - Electronics and Communication">B.E. - Electronics and Communication</option>
+                <option value="B.E. - Mechanical Engineering">B.E. - Mechanical Engineering</option>
+                <option value="M.Tech - Computer Science">M.Tech - Computer Science</option>
+                <option value="M.Tech - Electronics">M.Tech - Electronics</option>
+                <option value="Ph.D - Computer Science">Ph.D - Computer Science</option>
+            </select>
+
+            <!-- Educational Details Section -->
+            <div class="section-title">Educational Details</div>
+            
+            <div class="form-row">
+                <div class="form-col">
+                    <label for="schoolName10th" class="required-field">10th School Name</label>
+                    <input type="text" id="schoolName10th" name="schoolName10th" placeholder="Enter your 10th school name" required>
+                </div>
+                <div class="form-col">
+                    <label for="boardName10th" class="required-field">10th Board</label>
+                    <select id="boardName10th" name="boardName10th" required>
+                        <option value="">Select Board</option>
+                        <option value="CBSE">CBSE</option>
+                        <option value="ICSE">ICSE</option>
+                        <option value="State Board">State Board</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-col">
+                    <label for="yearOfPassing10th" class="required-field">Year of Passing 10th</label>
+                    <input type="number" id="yearOfPassing10th" name="yearOfPassing10th" min="2000" max="2025" placeholder="YYYY" required>
+                </div>
+            </div>
+
+            <label class="required-field">10th Marks Details</label>
+            <table class="marks-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Marks Obtained</th>
+                        <th>Maximum Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Mathematics</td>
+                        <td><input type="number" name="math10thMarks" min="0" max="100" required></td>
+                        <td><input type="number" name="math10thMax" value="100" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>Science</td>
+                        <td><input type="number" name="science10thMarks" min="0" max="100" required></td>
+                        <td><input type="number" name="science10thMax" value="100" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>English</td>
+                        <td><input type="number" name="english10thMarks" min="0" max="100" required></td>
+                        <td><input type="number" name="english10thMax" value="100" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>Social Studies</td>
+                        <td><input type="number" name="social10thMarks" min="0" max="100" required></td>
+                        <td><input type="number" name="social10thMax" value="100" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>Language</td>
+                        <td><input type="number" name="language10thMarks" min="0" max="100" required></td>
+                        <td><input type="number" name="language10thMax" value="100" readonly></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <label for="schoolName12th" class="required-field">12th School/College Name</label>
+                    <input type="text" id="schoolName12th" name="schoolName12th" placeholder="Enter your 12th school/college name" required>
+                </div>
+                <div class="form-col">
+                    <label for="boardName12th" class="required-field">12th Board</label>
+                    <select id="boardName12th" name="boardName12th" required>
+                        <option value="">Select Board</option>
+                        <option value="CBSE">CBSE</option>
+                        <option value="ICSE">ICSE</option>
+                        <option value="State Board">State Board</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-col">
+                    <label for="yearOfPassing12th" class="required-field">Year of Passing 12th</label>
+                    <input type="number" id="yearOfPassing12th" name="yearOfPassing12th" min="2000" max="2025" placeholder="YYYY" required>
+                </div>
+            </div>
+
+            <label class="required-field">12th Marks Details</label>
+            <table class="marks-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Marks Obtained</th>
+                        <th>Maximum Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Physics</td>
+                        <td><input type="number" name="physics12thMarks" min="0" max="100" required></td>
+                        <td><input type="number" name="physics12thMax" value="100" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>Chemistry</td>
+                        <td><input type="number" name="chemistry12thMarks" min="0" max="100" required></td>
+                        <td><input type="number" name="chemistry12thMax" value="100" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>Mathematics</td>
+                        <td><input type="number" name="math12thMarks" min="0" max="100" required></td>
+                        <td><input type="number" name="math12thMax" value="100" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>English</td>
+                        <td><input type="number" name="english12thMarks" min="0" max="100" required></td>
+                        <td><input type="number" name="english12thMax" value="100" readonly></td>
+                    </tr>
+                    <tr>
+                        <td>Optional Subject</td>
+                        <td><input type="number" name="optional12thMarks" min="0" max="100" required></td>
+                        <td><input type="number" name="optional12thMax" value="100" readonly></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Document Upload Section -->
+            <div class="section-title">Document Upload</div>
+            
+            <div class="file-input-container">
+                <label for="aadharCard" class="required-field">Aadhar Card (PDF/JPG/PNG, Max 2MB)</label>
+                <input type="file" id="aadharCard" name="aadharCard" accept=".pdf,.jpg,.jpeg,.png" required>
+            </div>
+            
+            <div class="file-input-container">
+                <label for="tenthMarksheet" class="required-field">10th Marksheet (PDF/JPG/PNG, Max 2MB)</label>
+                <input type="file" id="tenthMarksheet" name="tenthMarksheet" accept=".pdf,.jpg,.jpeg,.png" required>
+            </div>
+            
+            <div class="file-input-container">
+                <label for="twelfthMarksheet" class="required-field">12th Marksheet (PDF/JPG/PNG, Max 2MB)</label>
+                <input type="file" id="twelfthMarksheet" name="twelfthMarksheet" accept=".pdf,.jpg,.jpeg,.png" required>
+            </div>
+            
+            <div class="file-input-container">
+                <label for="photo" class="required-field">Passport Size Photo (JPG/PNG, Max 1MB)</label>
+                <input type="file" id="photo" name="photo" accept=".jpg,.jpeg,.png" required>
+            </div>
+
+            <!-- Consent Section -->
+            <div class="section-title">Declaration and Consent</div>
+            
+            <div class="checkbox-container">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="joinConsent" required>
+                    <span>I would like to join the selected college and pursue the selected course.</span>
+                </label>
+                
+                <label class="checkbox-label">
+                    <input type="checkbox" name="infoConsent" required>
+                    <span>I hereby declare that all the information provided by me is true to the best of my knowledge.</span>
+                </label>
+                
+                <label class="checkbox-label">
+                    <input type="checkbox" name="termsConsent" required>
+                    <span>I have read and agree to the <a href="#" id="terms-link">terms and conditions</a> of the college.</span>
+                </label>
+                
+                <label class="checkbox-label">
+                    <input type="checkbox" name="dataConsent" required>
+                    <span>I consent to the processing of my personal data for admission purposes.</span>
+                </label>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="success-message">
+        <p>Registration submitted successfully! A copy has been sent to your email.</p>
+    </div>
+    
+    <!-- About Popup -->
+    <div class="first-page">
+        <div id="about-overlay" class="overlay">
+            <div class="popup-message1">
+              <a href="#" id="close-popup" class="close-button">&times;</a>
+                <p>
+                The Admission Enquiry Chatbot is designed to streamline the information-gathering process for prospective students and their parents, making it easier to navigate the complexities of the admission process.  As educational institutions face a growing number of inquiries each year, the need for efficient, accessible, and responsive communication channels has become increasingly important.<br/> <br/> This chatbot leverages natural language processing (NLP) and machine learning algorithms to provide real-time, accurate information about admission procedures, eligibility criteria, important deadlines, course offerings, fee structures, and more. By simulating human-like conversations, the chatbot can answer frequently asked questions, guide users through application procedures, and even help schedule campus visits. The integration of a user-friendly interface ensures that even those with limited technical knowledge can easily interact with the system. <br/> <br/> Furthermore, the chatbot is designed to handle a large volume of inquiries simultaneously, providing immediate responses that significantly reduce the workload on administrative staff. The adaptability of the chatbot allows it to be customized to the specific needs of different educational institutions, ensuring that it provides relevant and institution-specific information. This system also includes a feedback mechanism to continuously improve its performance based on user interactions. <br/><br/> In addition to serving as an information hub, the chatbot can collect data on user interactions, helping institutions understand common concerns and areas of interest among prospective students. This data can be invaluable for improving the overall admissions process and tailoring marketing efforts. Overall, the Admission Enquiry Chatbot represents a significant advancement in how educational institutions engage with prospective students, offering a blend of efficiency, accuracy, and accessibility that is essential in today's digital age..
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation and popup handling
+        const links = document.querySelectorAll('.navbar a');
+        const currentPage = window.location.pathname.split('/').pop(); // Get the current page file name
+        const popup = document.createElement('div');
+        const aboutLink = document.getElementById('about-link');
+        const overlay = document.getElementById('about-overlay');
+        const closePopup = document.getElementById('close-popup');
+        const termsLink = document.getElementById('terms-link');
+        const registrationForm = document.getElementById('registrationForm');
+        const successMessage = document.getElementById('successMessage');
+        
+        popup.classList.add('popup-message');
+        document.body.appendChild(popup);
+        
+        // Handle active link highlighting and popup
+        links.forEach(link => {
+            if (link.getAttribute('href') === currentPage) {
+                link.classList.add('active'); // Add the 'active' class to the current link
+
+                // Add click event to show a popup message for the active link
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    popup.textContent = `You are currently viewing the ${link.textContent} page.`;
+                    popup.classList.add('show');
+
+                    // Hide popup after 3 seconds
+                    setTimeout(() => {
+                        popup.classList.remove('show');
+                    }, 3000);
+                });
+            }
+        });
+        
+        // About popup handling
+        aboutLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            overlay.classList.add('active'); // Show the popup and blur background
+        });
+
+        closePopup.addEventListener('click', (e) => {
+            e.preventDefault();
+            overlay.classList.remove('active'); // Hide the popup and remove blur
+        });
+        
+        // Terms and conditions link
+        termsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert("Terms and Conditions:\n\n1. All information provided must be accurate and verifiable.\n2. Admission is subject to verification of documents and eligibility criteria.\n3. The college reserves the right to cancel admission if any information is found to be false.\n4. Fees once paid are non-refundable.\n5. Students must adhere to the college code of conduct.");
+        });
+        
+        // Form submission handling
+        registrationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Here you would normally send the form data to a server
+            // For this example, we'll just show a success message
+            
+            // Simulate form submission with a delay
+            const formData = new FormData(registrationForm);
+            
+            // Show loading state
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            // Simulate sending data to server and generating PDF
+            setTimeout(() => {
+                // In a real implementation, you would send the form data to a server endpoint
+                // that would process the data and send emails with PDF attachments
+                
+                // For demonstration, just show success message
+                successMessage.style.display = 'block';
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                    
+                    // Reset form
+                    registrationForm.reset();
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit';
+                    
+                    // Scroll to top
+                    window.scrollTo(0, 0);
+                }, 5000);
+                
+                console.log("Form would be submitted to:");
+                console.log("Student Email: " + formData.get('email'));
+                console.log("College Email: codewithram04@gmail.com");
+                
+                // Log form data for demonstration
+                console.log("Form data that would be included in PDF:");
+                for (let [key, value] of formData.entries()) {
+                    if (key.includes('file')) {
+                        console.log(key + ': ' + value.name);
+                    } else {
+                        console.log(key + ': ' + value);
+                    }
+                }
+            }, 2000);
+        });
+        
+        // Dynamic form validation and interaction can be added here
+        // For example, showing/hiding fields based on selections
+    </script>
+</body>
+</html>
